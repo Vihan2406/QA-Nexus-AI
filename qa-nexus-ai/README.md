@@ -1,8 +1,8 @@
 # ⚡ QA Nexus AI
 
-**Intelligent AI-powered QA Test Case & Automation Script Generator**
+**Intelligent AI-powered QA Test Plan, Test Case & Automation Script Generator**
 
-A production-grade, enterprise-ready platform for QA engineers and project managers — featuring AI test generation, real-time sprint tracking, burndown analytics, team management, and report exports.
+A production-grade, enterprise-ready platform for QA engineers and project managers — featuring AI test plan drafting, vertical test case generation, an interactive Playwright runner simulator, project-based bug reporting, real-time sprint tracking, burndown analytics, and team management.
 
 ---
 
@@ -12,7 +12,8 @@ A production-grade, enterprise-ready platform for QA engineers and project manag
 |-------------|-------------------------------------|
 | Frontend    | React 18 + TypeScript               |
 | Build Tool  | Vite 5                              |
-| Styling     | Tailwind CSS 3 + Custom CSS Vars    |
+| Styling     | Tailwind CSS 3 + Beige Design System|
+| Typography  | Geist Sans & Geist Mono (Google)    |
 | Icons       | Lucide React                        |
 | Charts      | Recharts                            |
 | Backend     | Supabase (Postgres + Auth + RLS)    |
@@ -94,13 +95,15 @@ qa-nexus-ai/
 │   └── favicon.svg
 ├── src/
 │   ├── components/
-│   │   ├── AITestGenerator.tsx     # AI-powered test case sandbox
+│   │   ├── AITestGenerator.tsx     # AI test case sandbox & Playwright runner simulator
+│   │   ├── AITestPlan.tsx          # AI test plan drafting engine (PRDs to Strategy)
 │   │   ├── AnalyticsCharts.tsx     # Recharts: burndown, bar, pie, velocity
+│   │   ├── BugReporter.tsx         # Bug reporter database and resolution manager
 │   │   ├── ProjectCard.tsx         # Project card with progress + badges
 │   │   ├── ProjectModal.tsx        # Create/edit project form modal
 │   │   ├── Reports.tsx             # Report export panel + summary table
 │   │   ├── Settings.tsx            # App settings: API key, notifications
-│   │   ├── Sidebar.tsx             # Navigation sidebar
+│   │   ├── Sidebar.tsx             # Navigation sidebar with Bug Reporter addition
 │   │   ├── StatCard.tsx            # KPI stat card component
 │   │   └── Team.tsx                # Team invite + permissions table
 │   ├── context/
@@ -110,12 +113,12 @@ qa-nexus-ai/
 │   │       ├── client.ts           # Supabase client init
 │   │       └── types.ts            # Full TypeScript DB types
 │   ├── routes/
-│   │   ├── auth.tsx                # Login / Signup page
-│   │   └── dashboard.tsx           # Main dashboard (all tabs)
+│   │   ├── auth.tsx                # Login / Signup landing page (beige theme)
+│   │   └── dashboard.tsx           # Main dashboard workspace (tabs routing)
 │   ├── types/
 │   │   └── index.ts                # Shared TypeScript interfaces
 │   ├── App.tsx                     # Root app + auth router
-│   ├── index.css                   # Global styles + design tokens
+│   ├── index.css                   # Global styles + beige variables + Geist font imports
 │   └── main.tsx                    # React entry point
 ├── supabase/
 │   ├── migrations/
@@ -136,57 +139,65 @@ qa-nexus-ai/
 
 ## ✨ Features
 
+### 🎨 Beige Theme & Geist Typography
+- Premium **sand-beige design tokens** (`#f7f5f0` base, `#fdfcf9` surfaces, `#2b241a` espresso text) for a beautiful, paper-like warm aesthetic.
+- **Geist Sans & Geist Mono** fonts globally integrated for crisp, modern editorial developer interfaces.
+
 ### 🏠 Overview Dashboard
-- Personalised welcome banner with live story point stats
-- 4-metric KPI cards with trend indicators
-- Recent projects grid with one-click navigation
+- Personalised welcome banner with live story point stats.
+- 4-metric KPI cards with trend indicators.
+- Recent projects grid with one-click navigation.
 
 ### 📁 Project Manager
-- Full CRUD: create, edit, view projects
-- Status badges: Not Started / In Progress / Under Review / Completed
-- Priority labels: Critical / High / Medium / Low
-- Story point tracking with visual progress bars
-- Date range (start → target), tags, and search/filter toolbar
+- Full CRUD: create, edit, view projects.
+- Status badges: Not Started / In Progress / Under Review / Completed.
+- Priority labels: Critical / High / Medium / Low.
+- Story point tracking with visual progress bars.
+- Date range (start → target), tags, and search/filter toolbar.
 
-### 🤖 AI Test Generator
-- Manual description input OR file upload (PRD / spec)
-- Framework selector: Cypress or Playwright
-- Generates step-by-step test cases with expected results
-- Inline automation code with syntax-highlighted code blocks
-- One-click copy for each script
+### 📋 AI Test Plan
+- Upload PRD/Specs and draft industry-standard test strategies (objectives, methodology, matrix layout).
+- Select target frameworks (Playwright, Cypress, Selenium) and configurations.
+- Export matrices to CSV/PDF or save to project storage.
+
+### 🤖 AI Test Generator & Playwright Runner
+- Generates step-by-step test cases vertically line-by-line with **Expected Results placed in front of each testcase**.
+- **Playwright Test Runner**: Run individual tests directly from the dashboard.
+- **Simulated Terminal Console**: Opens an interactive console drawer displaying step-by-step test logs and failing traces (`npx playwright test`).
+- **Auto Bug Logging**: Automatically logs failed test executions to the Bug Reporter.
+
+### 🐛 Bug Reporter
+- Aggregates and stores failed test cases separately for each project.
+- Visual active bug statistics categorized by severity (Critical, High, Medium, Low).
+- Search bar and project filters to query bugs.
+- **Manual Resolution**: Resolve and remove bugs directly from the dashboard.
 
 ### 📊 Analytics
-- **Bar Chart** — total vs. completed vs. remaining story points per project
-- **Burndown Chart** — ideal vs. actual burndown with area gradients
-- **Pie Chart** — project status distribution
-- **Velocity Bar Chart** — completion % per project
+- **Bar Chart** — total vs. completed vs. remaining story points per project.
+- **Burndown Chart** — ideal vs. actual burndown with area gradients.
+- **Pie Chart** — project status distribution.
+- **Velocity Bar Chart** — completion % per project.
 
 ### 📄 Reports
-- Executive Summary export (PDF)
-- Test Coverage Report (CSV)
-- Sprint Burndown Report (PDF)
-- Activity Audit Log (CSV)
-- Project summary table with all key metrics
+- Executive Summary export (PDF).
+- Test Coverage Report (CSV).
+- Sprint Burndown Report (PDF).
+- Activity Audit Log (CSV).
+- Project summary table with all key metrics.
 
 ### 👥 Team
-- Invite team members by email with role assignment
-- Role-based permission table (Owner / Admin / QA Lead / Viewer)
-- Pending invitation tracking
-
-### ⚙️ Settings
-- Anthropic API key management
-- Notification preferences toggles
-- Webhook & third-party integrations (Jira, GitHub, Slack)
-- Danger zone: export data, delete account
+- Invite team members by email with role assignment.
+- Role-based permission table (Owner / Admin / QA Lead / Viewer).
+- Pending invitation tracking.
 
 ---
 
 ## 🔐 Security
 
-- All database tables use **Row Level Security (RLS)**
-- Users can only read/write their own data
-- Auth tokens managed by Supabase (auto-refresh enabled)
-- Environment variables never committed to git
+- All database tables use **Row Level Security (RLS)**.
+- Users can only read/write their own data.
+- Auth tokens managed by Supabase (auto-refresh enabled).
+- Environment variables never committed to git.
 
 ---
 
@@ -204,18 +215,6 @@ npx vercel --prod
 ```
 
 Remember to set your `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as environment variables in your hosting platform.
-
----
-
-## 🐛 Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| `VITE_SUPABASE_URL is missing` | Ensure `.env` file exists and has correct values |
-| Login fails with 400 error | Check that your Supabase project is active and anon key is correct |
-| Charts show no data | Create at least one project with start and target dates |
-| Build error: `Cannot find module` | Run `npm install` to restore node_modules |
-| Auth redirect loop | Clear browser localStorage and try again |
 
 ---
 
