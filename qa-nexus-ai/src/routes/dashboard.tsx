@@ -10,6 +10,7 @@ import StatCard from '../components/StatCard'
 import AITestGenerator from '../components/AITestGenerator'
 import AITestPlan from '../components/AITestPlan'
 import BugReporter from '../components/BugReporter'
+import Notifications from '../components/Notifications'
 import AnalyticsCharts from '../components/AnalyticsCharts'
 import Reports from '../components/Reports'
 import Team from '../components/Team'
@@ -87,7 +88,70 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [notifCount] = useState(3)
+  
+  interface NotificationItem {
+    id: string
+    title: string
+    message: string
+    type: 'info' | 'success' | 'warning' | 'error'
+    read: boolean
+    timestamp: string
+  }
+  
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+
+  const loadNotifications = () => {
+    try {
+      const stored = localStorage.getItem('qa-nexus-notifications')
+      if (stored) {
+        setNotifications(JSON.parse(stored))
+      } else {
+        const demoNotifs: NotificationItem[] = [
+          {
+            id: 'notif-1',
+            title: 'Welcome to QA Nexus AI',
+            message: 'Your workspace is ready. You can now generate test plans, E2E scripts, and invite team members.',
+            type: 'success',
+            read: false,
+            timestamp: new Date(Date.now() - 30 * 60000).toISOString()
+          },
+          {
+            id: 'notif-2',
+            title: 'Team Member Joined',
+            message: 'Priya Sharma (QA Lead) has joined your workspace.',
+            type: 'info',
+            read: false,
+            timestamp: new Date(Date.now() - 2 * 3600000).toISOString()
+          },
+          {
+            id: 'notif-3',
+            title: 'Overdue Project Warning',
+            message: 'Payment Gateway Integration is approaching its target date soon.',
+            type: 'warning',
+            read: false,
+            timestamp: new Date(Date.now() - 24 * 3600000).toISOString()
+          }
+        ]
+        localStorage.setItem('qa-nexus-notifications', JSON.stringify(demoNotifs))
+        setNotifications(demoNotifs)
+      }
+    } catch (e) {
+      console.warn(e)
+    }
+  }
+
+  useEffect(() => {
+    loadNotifications()
+    const handleNotifUpdate = () => loadNotifications()
+    window.addEventListener('storage', handleNotifUpdate)
+    window.addEventListener('qa-nexus-notifications-updated', handleNotifUpdate)
+    return () => {
+      window.removeEventListener('storage', handleNotifUpdate)
+      window.removeEventListener('qa-nexus-notifications-updated', handleNotifUpdate)
+    }
+  }, [])
+
+  const unreadNotifsCount = notifications.filter(n => !n.read).length
 
   const fetchProjects = useCallback(async () => {
     if (!user) return
@@ -196,15 +260,18 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Notifications bell */}
-            <button className="relative p-2 rounded-lg hover:bg-white transition-colors">
+             {/* Notifications bell */}
+            <button
+              onClick={() => setActiveTab('notifications')}
+              className="relative p-2 rounded-lg hover:bg-white transition-colors"
+            >
               <Bell size={17} style={{ color: 'var(--text-secondary)' }} />
-              {notifCount > 0 && (
+              {unreadNotifsCount > 0 && (
                 <span
                   className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs font-bold"
                   style={{ background: '#dc2626', fontSize: 9 }}
                 >
-                  {notifCount}
+                  {unreadNotifsCount}
                 </span>
               )}
             </button>
@@ -474,8 +541,11 @@ export default function Dashboard() {
           {/* ─── TEAM ─── */}
           {activeTab === 'team' && <Team />}
 
+          {/* ─── NOTIFICATIONS ─── */}
+          {activeTab === 'notifications' && <Notifications />}
+
           {/* ─── SETTINGS ─── */}
-          {(activeTab === 'settings' || activeTab === 'notifications') && <Settings />}
+          {activeTab === 'settings' && <Settings />}
         </div>
       </main>
 

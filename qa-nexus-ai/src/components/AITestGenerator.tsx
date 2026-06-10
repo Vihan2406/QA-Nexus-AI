@@ -112,6 +112,69 @@ test.describe('Password Field Masking', () => {
   });
 });`,
   },
+  {
+    title: 'TC-004: Password Reset Request Flow',
+    priority: 'Medium',
+    steps: [
+      'Click the "Forgot Password?" link on login page',
+      'Enter a registered email address in the Email input field',
+      'Click the "Send Reset Link" button',
+      'Verify a success toast message "Reset link sent" is displayed',
+      'Verify the reset token is successfully created in the DB',
+    ],
+    expectedResult: 'Password reset email is successfully dispatched. User sees confirmation toast and remains on the login flow.',
+    framework: 'playwright',
+    automationCode: `import { test, expect } from '@playwright/test';
+
+test.describe('Password Reset Flow', () => {
+  test('should request password reset link successfully', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByTestId('forgot-password-link').click();
+
+    await page.getByTestId('reset-email-input')
+      .fill('user@example.com');
+    await page.getByTestId('send-reset-btn').click();
+
+    const toast = page.getByTestId('success-toast');
+    await expect(toast).toBeVisible();
+    await expect(toast).toContainText('Reset link sent');
+  });
+});`,
+  },
+  {
+    title: 'TC-005: Account Lockout on Multiple Invalid Attempts',
+    priority: 'High',
+    steps: [
+      'Navigate to the login page',
+      'Enter valid email and an incorrect password 5 times in a row',
+      'Verify that the account gets locked on the 5th attempt',
+      'Verify the error toast displays "Account locked. Try again in 15 minutes."',
+      'Try to log in with the correct password and verify it fails',
+    ],
+    expectedResult: 'User account is locked out temporarily. Subsequent login attempts with valid password are rejected until lockout expires.',
+    framework: 'playwright',
+    automationCode: `import { test, expect } from '@playwright/test';
+
+test.describe('Account Lockout Flow', () => {
+  test('should lock account after 5 failed login attempts', async ({ page }) => {
+    await page.goto('/login');
+
+    for (let i = 0; i < 5; i++) {
+      await page.getByTestId('email-input').fill('user@example.com');
+      await page.getByTestId('password-input').fill('WrongPassword' + i);
+      await page.getByTestId('signin-btn').click();
+      
+      if (i < 4) {
+        await expect(page.getByTestId('error-toast')).toContainText('Invalid credentials');
+      }
+    }
+
+    const lockoutToast = page.getByTestId('error-toast');
+    await expect(lockoutToast).toBeVisible();
+    await expect(lockoutToast).toContainText('Account locked. Try again in 15 minutes.');
+  });
+});`,
+  },
 ]
 
 const PRIORITY_STYLES: Record<Priority, string> = {
@@ -383,8 +446,22 @@ export default function AITestGenerator({ projects }: AITestGeneratorProps) {
         // Dispatch event for same-tab updates
         window.dispatchEvent(new Event('qa-nexus-bugs-updated'))
       }
+
+      // Add failure notification to inbox
+      const existingNotifs = JSON.parse(localStorage.getItem('qa-nexus-notifications') || '[]')
+      const newNotif = {
+        id: `notif-${Date.now()}`,
+        title: 'Playwright Test Failure Logged',
+        message: `Test case "${tc.title.split(':')[0] || 'Playwright Test'}" failed at step: "${failedStep}". Bug report logged under project "${projName}".`,
+        type: 'error',
+        read: false,
+        timestamp: new Date().toISOString()
+      }
+      existingNotifs.unshift(newNotif)
+      localStorage.setItem('qa-nexus-notifications', JSON.stringify(existingNotifs))
+      window.dispatchEvent(new Event('qa-nexus-notifications-updated'))
     } catch (e) {
-      console.error('Error logging bug:', e)
+      console.error('Error logging bug or notification:', e)
     }
   }
 
